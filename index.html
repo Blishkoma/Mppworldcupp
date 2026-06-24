@@ -75,6 +75,34 @@
             position: relative;
         }
 
+        /* Barre de recherche iOS */
+        .search-bar-wrapper {
+            margin-bottom: 16px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 14px;
+            border: 1px solid var(--border-color);
+            background-color: #F2F2F7;
+            font-size: 16px;
+            font-family: inherit;
+            color: var(--text-main);
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .search-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .search-input:focus {
+            border-color: var(--accent-color);
+            background-color: var(--card-bg);
+            box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
+        }
+
         /* Menu vertical défilant style iOS (Grille) */
         .pills-container {
             display: grid;
@@ -191,11 +219,18 @@
         <p class="subtitle">Analyse dynamique de la ligue</p>
     </div>
 
+    <!-- Carte des participants avec Barre de recherche -->
     <div class="card" style="padding-bottom: 16px;">
         <h2 class="section-title" style="margin-bottom: 12px; font-size: 18px;">Participants</h2>
+        
+        <div class="search-bar-wrapper">
+            <input type="text" id="searchInput" class="search-input" placeholder="Rechercher un joueur...">
+        </div>
+
         <div class="pills-container" id="playerPills"></div>
     </div>
 
+    <!-- Graphique Général -->
     <div class="card">
         <h2 class="section-title">Général</h2>
         <div class="chart-wrapper">
@@ -203,6 +238,7 @@
         </div>
     </div>
 
+    <!-- Graphique Forme du moment -->
     <div class="card">
         <h2 class="section-title">Forme du moment</h2>
         <div class="recent-controls">
@@ -350,7 +386,6 @@
                 options: JSON.parse(JSON.stringify(commonOptions))
             });
 
-            // Fonction corrigée : elle lit désormais le statut masqué/affiché du premier graphique
             function updateRecentChart() {
                 let n = parseInt(document.getElementById('recentMatchesInput').value);
                 if(isNaN(n) || n < 1) n = 1;
@@ -379,7 +414,6 @@
                 }
 
                 const recentDatasets = mainChart.data.datasets.map((ds, idx) => {
-                    // Vérification de l'état actuel sur le graphique principal
                     let metaMain = mainChart.getDatasetMeta(idx);
                     let isCurrentlyHidden = (metaMain.hidden === true);
 
@@ -394,7 +428,7 @@
                         pointHoverRadius: 6,
                         pointHitRadius: 15,
                         scores: recentCumul[ds.label],
-                        hidden: isCurrentlyHidden // On force la synchronisation
+                        hidden: isCurrentlyHidden
                     };
                 });
 
@@ -449,7 +483,6 @@
                     const metaMain = mainChart.getDatasetMeta(index);
                     const isCurrentlyHidden = (metaMain.hidden === true);
                     
-                    // Inverser l'état
                     metaMain.hidden = !isCurrentlyHidden;
                     
                     const metaRecent = recentChart.getDatasetMeta(index);
@@ -468,6 +501,22 @@
                 pill.appendChild(colorWrapper);
                 pill.appendChild(label);
                 pillsContainer.appendChild(pill);
+            });
+
+            // Logique de la barre de recherche
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase().trim();
+                const pills = pillsContainer.querySelectorAll('.pill');
+                
+                pills.forEach(pill => {
+                    const playerName = pill.querySelector('span').innerText.toLowerCase();
+                    if (playerName.includes(searchTerm)) {
+                        pill.style.display = 'flex';
+                    } else {
+                        pill.style.display = 'none';
+                    }
+                });
             });
         });
     </script>
