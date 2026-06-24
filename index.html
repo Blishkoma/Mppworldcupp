@@ -36,7 +36,7 @@
 
         .header {
             text-align: center;
-            margin: 24px 0;
+            margin: 20px 0;
             width: 100%;
             max-width: 1200px;
         }
@@ -63,74 +63,7 @@
             color: var(--text-main);
         }
 
-        /* Menu défilant style iOS (Pilules) */
-        .pills-wrapper {
-            width: 100%;
-            max-width: 1200px;
-            margin-bottom: 20px;
-        }
-
-        .pills-container {
-            display: flex;
-            gap: 12px;
-            overflow-x: auto;
-            padding: 4px 16px 16px 4px;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
-        }
-
-        .pills-container::-webkit-scrollbar {
-            display: none;
-        }
-
-        .pill {
-            background: var(--card-bg);
-            border-radius: 20px;
-            padding: 10px 18px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
-            font-size: 15px;
-            font-weight: 600;
-            color: var(--text-muted);
-            cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
-            border: 2px solid transparent;
-            white-space: nowrap;
-            opacity: 0.6;
-        }
-
-        .pill.active {
-            opacity: 1;
-            color: var(--text-main);
-            border-color: var(--card-bg);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-        }
-
-        .color-dot {
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-        }
-
-        /* Sélecteur de couleur caché au-dessus de la pastille */
-        .color-picker-wrapper {
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .color-picker-input {
-            position: absolute;
-            opacity: 0;
-            width: 100%;
-            height: 100%;
-            cursor: pointer;
-        }
-
-        /* Cartes d'affichage des graphiques */
+        /* Cartes générales */
         .card {
             background: var(--card-bg);
             border-radius: 24px;
@@ -142,6 +75,74 @@
             position: relative;
         }
 
+        /* Menu vertical défilant style iOS (Grille) */
+        .pills-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* 2 colonnes sur mobile */
+            gap: 10px;
+            max-height: 220px; /* Défilement vertical à partir de cette hauteur */
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 4px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        @media (min-width: 768px) {
+            .pills-container {
+                grid-template-columns: repeat(4, 1fr); /* 4 colonnes sur grand écran */
+            }
+        }
+
+        .pill {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+            border: 2px solid transparent;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            opacity: 0.5;
+        }
+
+        .pill.active {
+            opacity: 1;
+            color: var(--text-main);
+            border-color: var(--card-bg);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .color-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .color-picker-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .color-picker-input {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
         .chart-wrapper {
             position: relative;
             height: 55vh;
@@ -149,13 +150,12 @@
             width: 100%;
         }
 
-        /* Contrôles modernes pour la forme du moment */
         .recent-controls {
             display: flex;
             align-items: center;
             gap: 12px;
             margin-bottom: 20px;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 500;
             background: #F9F9FB;
             padding: 12px 16px;
@@ -164,12 +164,12 @@
         }
 
         .recent-input {
-            width: 60px;
+            width: 55px;
             text-align: center;
             border-radius: 10px;
             border: none;
             padding: 8px;
-            font-size: 18px;
+            font-size: 17px;
             font-weight: 700;
             background: var(--card-bg);
             color: var(--accent-color);
@@ -188,10 +188,11 @@
 
     <div class="header">
         <h1>Classement MPP</h1>
-        <p class="subtitle">Analyse dynamique de la ligue familiale</p>
+        <p class="subtitle">Analyse dynamique de la ligue</p>
     </div>
 
-    <div class="pills-wrapper">
+    <div class="card" style="padding-bottom: 16px;">
+        <h2 class="section-title" style="margin-bottom: 12px; font-size: 18px;">Participants</h2>
         <div class="pills-container" id="playerPills"></div>
     </div>
 
@@ -247,6 +248,7 @@
             const players = Object.keys(rawData);
             let maxMatches = Math.max(...players.map(p => rawData[p].length));
 
+            // Calcul global
             const cumulativeScores = {};
             players.forEach(player => {
                 cumulativeScores[player] = [];
@@ -348,6 +350,7 @@
                 options: JSON.parse(JSON.stringify(commonOptions))
             });
 
+            // Fonction corrigée : elle lit désormais le statut masqué/affiché du premier graphique
             function updateRecentChart() {
                 let n = parseInt(document.getElementById('recentMatchesInput').value);
                 if(isNaN(n) || n < 1) n = 1;
@@ -375,19 +378,25 @@
                     });
                 }
 
-                const recentDatasets = mainChart.data.datasets.map((ds, idx) => ({
-                    label: ds.label,
-                    data: recentRankings[ds.label],
-                    borderColor: ds.borderColor,
-                    backgroundColor: ds.backgroundColor,
-                    borderWidth: 3,
-                    tension: 0.4,
-                    pointRadius: 0,
-                    pointHoverRadius: 6,
-                    pointHitRadius: 15,
-                    scores: recentCumul[ds.label],
-                    hidden: ds.hidden
-                }));
+                const recentDatasets = mainChart.data.datasets.map((ds, idx) => {
+                    // Vérification de l'état actuel sur le graphique principal
+                    let metaMain = mainChart.getDatasetMeta(idx);
+                    let isCurrentlyHidden = (metaMain.hidden === true);
+
+                    return {
+                        label: ds.label,
+                        data: recentRankings[ds.label],
+                        borderColor: ds.borderColor,
+                        backgroundColor: ds.backgroundColor,
+                        borderWidth: 3,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        pointHoverRadius: 6,
+                        pointHitRadius: 15,
+                        scores: recentCumul[ds.label],
+                        hidden: isCurrentlyHidden // On force la synchronisation
+                    };
+                });
 
                 recentChart.data.labels = Array.from({length: n}, (_, i) => `M${startIdx + i + 1}`);
                 recentChart.data.datasets = recentDatasets;
@@ -397,7 +406,7 @@
             document.getElementById('recentMatchesInput').addEventListener('change', updateRecentChart);
             updateRecentChart();
 
-            // Création des pilules défilantes style Apple
+            // Création de la grille verticale des participants
             const pillsContainer = document.getElementById('playerPills');
             
             mainChart.data.datasets.forEach((dataset, index) => {
@@ -437,11 +446,16 @@
                 pill.addEventListener('click', (e) => {
                     if(e.target === colorInput) return;
                     
-                    const isHidden = !mainChart.getDatasetMeta(index).hidden;
-                    mainChart.getDatasetMeta(index).hidden = isHidden;
-                    recentChart.getDatasetMeta(index).hidden = isHidden;
+                    const metaMain = mainChart.getDatasetMeta(index);
+                    const isCurrentlyHidden = (metaMain.hidden === true);
                     
-                    if(isHidden) {
+                    // Inverser l'état
+                    metaMain.hidden = !isCurrentlyHidden;
+                    
+                    const metaRecent = recentChart.getDatasetMeta(index);
+                    if(metaRecent) metaRecent.hidden = !isCurrentlyHidden;
+                    
+                    if(!isCurrentlyHidden) {
                         pill.classList.remove('active');
                     } else {
                         pill.classList.add('active');
