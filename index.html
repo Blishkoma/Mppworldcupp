@@ -106,9 +106,9 @@
         /* Menu vertical défilant style iOS (Grille) */
         .pills-container {
             display: grid;
-            grid-template-columns: repeat(2, 1fr); /* 2 colonnes sur mobile */
+            grid-template-columns: repeat(2, 1fr);
             gap: 10px;
-            max-height: 220px; /* Défilement vertical à partir de cette hauteur */
+            max-height: 220px;
             overflow-y: auto;
             overflow-x: hidden;
             padding: 4px;
@@ -117,7 +117,7 @@
 
         @media (min-width: 768px) {
             .pills-container {
-                grid-template-columns: repeat(4, 1fr); /* 4 colonnes sur grand écran */
+                grid-template-columns: repeat(4, 1fr);
             }
         }
 
@@ -219,7 +219,6 @@
         <p class="subtitle">Analyse dynamique de la ligue</p>
     </div>
 
-    <!-- Carte des participants avec Barre de recherche -->
     <div class="card" style="padding-bottom: 16px;">
         <h2 class="section-title" style="margin-bottom: 12px; font-size: 18px;">Participants</h2>
         
@@ -230,7 +229,6 @@
         <div class="pills-container" id="playerPills"></div>
     </div>
 
-    <!-- Graphique Général -->
     <div class="card">
         <h2 class="section-title">Général</h2>
         <div class="chart-wrapper">
@@ -238,7 +236,6 @@
         </div>
     </div>
 
-    <!-- Graphique Forme du moment -->
     <div class="card">
         <h2 class="section-title">Forme du moment</h2>
         <div class="recent-controls">
@@ -284,7 +281,6 @@
             const players = Object.keys(rawData);
             let maxMatches = Math.max(...players.map(p => rawData[p].length));
 
-            // Calcul global
             const cumulativeScores = {};
             players.forEach(player => {
                 cumulativeScores[player] = [];
@@ -323,7 +319,7 @@
                 pointHoverRadius: 6,
                 pointHitRadius: 15,
                 scores: cumulativeScores[player],
-                hidden: false
+                hidden: true // CHANGEMENT : Tous cachés par défaut
             }));
 
             const commonOptions = {
@@ -415,7 +411,8 @@
 
                 const recentDatasets = mainChart.data.datasets.map((ds, idx) => {
                     let metaMain = mainChart.getDatasetMeta(idx);
-                    let isCurrentlyHidden = (metaMain.hidden === true);
+                    // On gère correctement l'état initial nul de chart.js
+                    let isCurrentlyHidden = metaMain.hidden === null ? mainChart.data.datasets[idx].hidden : metaMain.hidden;
 
                     return {
                         label: ds.label,
@@ -440,12 +437,11 @@
             document.getElementById('recentMatchesInput').addEventListener('change', updateRecentChart);
             updateRecentChart();
 
-            // Création de la grille verticale des participants
             const pillsContainer = document.getElementById('playerPills');
             
             mainChart.data.datasets.forEach((dataset, index) => {
                 const pill = document.createElement('div');
-                pill.className = 'pill active';
+                pill.className = 'pill'; // CHANGEMENT : Retrait de la classe 'active'
                 
                 const colorWrapper = document.createElement('div');
                 colorWrapper.className = 'color-picker-wrapper';
@@ -480,18 +476,18 @@
                 pill.addEventListener('click', (e) => {
                     if(e.target === colorInput) return;
                     
-                    const metaMain = mainChart.getDatasetMeta(index);
-                    const isCurrentlyHidden = (metaMain.hidden === true);
+                    let metaMain = mainChart.getDatasetMeta(index);
+                    let isCurrentlyHidden = metaMain.hidden === null ? mainChart.data.datasets[index].hidden : metaMain.hidden;
                     
                     metaMain.hidden = !isCurrentlyHidden;
                     
                     const metaRecent = recentChart.getDatasetMeta(index);
                     if(metaRecent) metaRecent.hidden = !isCurrentlyHidden;
                     
-                    if(!isCurrentlyHidden) {
-                        pill.classList.remove('active');
+                    if(isCurrentlyHidden) {
+                        pill.classList.add('active'); // Il était caché, on l'affiche
                     } else {
-                        pill.classList.add('active');
+                        pill.classList.remove('active'); // Il était affiché, on le cache
                     }
                     
                     mainChart.update();
@@ -503,7 +499,6 @@
                 pillsContainer.appendChild(pill);
             });
 
-            // Logique de la barre de recherche
             const searchInput = document.getElementById('searchInput');
             searchInput.addEventListener('input', function(e) {
                 const searchTerm = e.target.value.toLowerCase().trim();
@@ -514,7 +509,7 @@
                     if (playerName.includes(searchTerm)) {
                         pill.style.display = 'flex';
                     } else {
-                        pill.style.display = 'none'; 
+                        pill.style.display = 'none';
                     }
                 });
             });
