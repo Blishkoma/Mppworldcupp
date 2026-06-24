@@ -319,7 +319,7 @@
                 pointHoverRadius: 6,
                 pointHitRadius: 15,
                 scores: cumulativeScores[player],
-                hidden: true // CHANGEMENT : Tous cachés par défaut
+                hidden: true 
             }));
 
             const commonOptions = {
@@ -411,7 +411,6 @@
 
                 const recentDatasets = mainChart.data.datasets.map((ds, idx) => {
                     let metaMain = mainChart.getDatasetMeta(idx);
-                    // On gère correctement l'état initial nul de chart.js
                     let isCurrentlyHidden = metaMain.hidden === null ? mainChart.data.datasets[idx].hidden : metaMain.hidden;
 
                     return {
@@ -441,7 +440,7 @@
             
             mainChart.data.datasets.forEach((dataset, index) => {
                 const pill = document.createElement('div');
-                pill.className = 'pill'; // CHANGEMENT : Retrait de la classe 'active'
+                pill.className = 'pill';
                 
                 const colorWrapper = document.createElement('div');
                 colorWrapper.className = 'color-picker-wrapper';
@@ -485,9 +484,9 @@
                     if(metaRecent) metaRecent.hidden = !isCurrentlyHidden;
                     
                     if(isCurrentlyHidden) {
-                        pill.classList.add('active'); // Il était caché, on l'affiche
+                        pill.classList.add('active');
                     } else {
-                        pill.classList.remove('active'); // Il était affiché, on le cache
+                        pill.classList.remove('active');
                     }
                     
                     mainChart.update();
@@ -513,7 +512,35 @@
                     }
                 });
             });
+
+            // --- NOUVEAU CODE : Gestion de la disparition de la bulle (Tooltip) sur mobile ---
+            function hideTooltips() {
+                mainChart.setActiveElements([]);
+                mainChart.tooltip.setActiveElements([], {x: 0, y: 0});
+                mainChart.update();
+                
+                recentChart.setActiveElements([]);
+                recentChart.tooltip.setActiveElements([], {x: 0, y: 0});
+                recentChart.update();
+            }
+
+            // Disparaît quand on lâche le graphique
+            document.getElementById('rankingChart').addEventListener('touchend', function() {
+                setTimeout(hideTooltips, 50);
+            });
+            
+            document.getElementById('recentChart').addEventListener('touchend', function() {
+                setTimeout(hideTooltips, 50);
+            });
+
+            // Disparaît si on touche n'importe où ailleurs sur l'écran
+            document.addEventListener('touchstart', function(e) {
+                if (e.target.tagName !== 'CANVAS') {
+                    hideTooltips();
+                }
+            });
+
         });
-    </script> 
+    </script>
 </body>
 </html>
